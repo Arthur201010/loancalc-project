@@ -73,6 +73,26 @@
     thead {
       background-color: #f2f2f2;
     }
+
+    #tableContainer {
+      max-height: 400px;
+      overflow-y: auto;
+      border: 1px solid black;
+      width: 60%;
+      margin: 0 auto;
+    }
+
+    @media screen and (max-width: 1024px) {
+      #tableContainer {
+        width: 80%;
+      }
+    }
+
+    @media screen and (max-width: 600px) {
+      #tableContainer {
+        width: 100%;
+      }
+    }
   </style>
 </head>
 
@@ -81,37 +101,38 @@
 
   <form action="">
     <label for="principal">本金 (元):</label>
-    <input type="number" id="principal" name="principal" value="1000000" required>
+    <input type="number" id="principal" name="principal" placeholder="1000000" required>
     <br>
     <label for="rate">年利率 (%):</label>
-    <input type="number" id="rate" name="rate" step="0.01" value="2.5" required>
+    <input type="number" id="rate" name="rate" step="0.01" placeholder="2.5" required>
     <br>
     <label for="time">貸款期限 (年):</label>
-    <input type="number" id="time" name="time" value="20" required>
+    <input type="number" id="time" name="time" placeholder="20" required>
     <br>
     <div class="buttons">
       <button type="button" id="calc">計算利息</button>
-      <button type="button" onclick="reset()">重置輸入</button>
+      <button type="button" onclick="aaa()">重置輸入</button>
     </div>
   </form>
   <div id="result" style="margin-top: 20px;">
-    <h2>貸款金額:1000000 總利息支出:548548 總金額:1548548</h2>
+
   </div>
+  <div id="tableContainer">
+    <table id="resultTable">
+      <thead>
+        <tr>
+          <th>期別</th>
+          <th>攤還本金</th>
+          <th>攤還利息</th>
+          <th>月付金</th>
+          <th>貸款餘額</th>
+        </tr>
+      </thead>
+      <tbody>
 
-  <table id="resultTable">
-    <thead>
-      <tr>
-        <th>期別</th>
-        <th>攤還本金</th>
-        <th>攤還利息</th>
-        <th>月付金</th>
-        <th>貸款餘額</th>
-      </tr>
-    </thead>
-    <tbody>
-
-    </tbody>
-  </table>
+      </tbody>
+    </table>
+  </div>
   <script> // 參考台新銀行 本金平均攤還
     const principalEl = document.querySelector("#principal");
     const rateEl = document.querySelector("#rate");
@@ -122,10 +143,13 @@
 
     console.log(principalEl, rateEl, timeEl, resultTableEl);
 
-    function reset() {
-      principalEl.innerHTML = "";
-      rateEl.innerHTML = "";
-      timeEl.innerHTML = "";
+    function aaa() {
+      principalEl.value = "";
+      rateEl.value = "";
+      timeEl.value = "";
+
+      resultEl.innerHTML = "";
+      resultTableEl.innerHTML = "";
     }
 
     calcEl.addEventListener("click", () => {
@@ -140,7 +164,7 @@
       // 1.計算每個月應還本金
       let month_pay = Math.round(principal / months);
       let tempHtml = "";
-
+      let tol_interest = 0;
       for (let i = 0; i < months; i++) {
         // 計算每個月利息
         let interest = Math.round(principal * month_rate);
@@ -148,7 +172,7 @@
         principal -= month_pay;
         // 每月應還(本金+利息), 剩餘貸款(末期調整 8/8 8- 2:00:00)
         //resultEl.innerHTML = "";
-
+        tol_interest += interest
         tempHtml += "<tr>"; // ok 2:30:00
         if (i == months - 1) {
           tempHtml += `<td>${i + 1}</td><td>${month_pay + principal}</td><td>${interest}</td>
@@ -161,6 +185,10 @@
         }
         tempHtml += "</tr>";
       }
+      // console.log(tempHtml);
+
+      resultEl.innerHTML = `<h2>貸款金額:${Number(principalEl.value)} 總利息支出:${tol_interest}
+        <br>總金額:${Number(principalEl.value) + tol_interest}</h2>`
       resultTableEl.innerHTML = tempHtml;
       console.log(principal, rate, time, months, month_rate, month_pay);
     });
